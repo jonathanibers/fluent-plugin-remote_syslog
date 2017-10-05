@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.summary       = %q{Fluentd output plugin for remote syslog with more customization}
   spec.description   = spec.description
   spec.homepage      = "https://github.com/jonathanibers/fluent-plugin-remote_syslog_custom"
-  spec.license       = ""
+  spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
