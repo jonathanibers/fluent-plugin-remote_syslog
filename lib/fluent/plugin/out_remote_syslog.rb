@@ -17,7 +17,7 @@ module Fluent
     config_param :port, :integer, :default => 514
 
     config_param :facility, :string, :default => "user"
-    config_param :severity, :string, :default => "notice"
+    config_param :severity, :string, :default => "info"
     config_param :tag, :string, :default => "fluentd"
 
     def initialize
@@ -40,14 +40,22 @@ module Fluent
         end
 
         tag = rewrite_tag!(tag.dup)
-        @loggers[tag] ||= RemoteSyslogLogger::UdpSender.new(@host,
-          @port,
-          facility: record["facility"] || @facility,
-          severity: record["severity"] || @severity,
-          program: tag,
-          local_hostname: @hostname)
+        
+        @loggers[@host + @port] ||= RemoteSyslogLogger::UdpSender.new(
+          @host, @port)
 
-        @loggers[tag].transmit format(tag, time, record)
+        @loggers[@host + @port].packet.severity = record["severity"] || @severity
+        @loggers[@host + @port].packet.facility = record["facility"] || @facility
+        @loggers[@host + @port].packet.tag = record["tag"] || tag
+        @loggers[@host + @port].transmit("Hello there!")
+        #@loggers[tag] ||= RemoteSyslogLogger::UdpSender.new(@host,
+          #@port,
+          #facility: record["facility"] || @facility,
+          #severity: record["severity"] || @severity,
+          #program: tag,
+          #local_hostname: record["hostname"] || @hostname)
+
+        #@loggers[tag].transmit format(tag, time, record)
       end
       chain.next
     end
