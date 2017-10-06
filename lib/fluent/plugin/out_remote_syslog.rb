@@ -39,23 +39,26 @@ module Fluent
           end
         end
 
-        tag = rewrite_tag!(tag.dup)
+        #tag = rewrite_tag!(tag.dup)
         
-        @loggers[@host + @port] ||= RemoteSyslogLogger::UdpSender.new(
-          @host, @port)
-
-        @loggers[@host + @port].packet.severity = record["severity"] || @severity
-        @loggers[@host + @port].packet.facility = record["facility"] || @facility
-        @loggers[@host + @port].packet.tag = record["tag"] || tag
-        @loggers[@host + @port].transmit("Hello there!")
-        #@loggers[tag] ||= RemoteSyslogLogger::UdpSender.new(@host,
-          #@port,
-          #facility: record["facility"] || @facility,
+        #@loggers[@host + @port.to_s] = RemoteSyslogLogger::UdpSender.new(
+          #@host, @port, facility: record["facility"] || @facility,
           #severity: record["severity"] || @severity,
-          #program: tag,
-          #local_hostname: record["hostname"] || @hostname)
+          #program: record["tag"] || tag,
+          #local_hostname: record["hostnane"] || @hostname)
 
-        #@loggers[tag].transmit format(tag, time, record)
+        #@loggers[@host + @port.to_s].transmit format(tag, time, record)
+        
+        tag = rewrite_tag!(tag.dup)
+        @loggers[@host + @port.to_s] = RemoteSyslogLogger::UdpSender.new(@host,
+          @port,
+          facility: record["facility"] || @facility,
+          severity: record["severity"] || @severity,
+          program: record["tag"] || tag,
+          local_hostname: record["hostname"] || @hostname)
+
+        @loggers[@host + @port.to_s].transmit(record["message"])
+
       end
       chain.next
     end
